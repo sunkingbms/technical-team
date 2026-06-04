@@ -1,0 +1,30 @@
+import structlog
+from fastapi import Request
+from fastapi.responses import JSONResponse
+from app.config import get_settings
+from datetime import datetime
+
+
+logger = structlog.get_logger()
+
+async def error_handler_middleware(request: Request, call_next) -> JSONResponse:
+    """Handle errors gracefully and return JSON responses"""
+    try:
+        response = await call_next(request)
+        return response
+    except Exception as e:
+        settings = get_settings()
+        
+        content = {
+            "error": "INTERNAL_SERVER_ERROR",
+            "message": "An unexpected error occurred"
+        }
+        
+        if settings.app_env == "development":
+            content["details"] = str(e)
+        
+        logger.exception("unhandled_exception", error=error_payload)
+        return JSONResponse(
+            status_code=500,
+            content=content,
+        )

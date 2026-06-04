@@ -5,7 +5,8 @@ from functools import lru_cache
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
-        case_sensitive=True,
+        case_sensitive=False,
+        extra="ignore"
     )
     
     app_env: str
@@ -20,7 +21,8 @@ class Settings(BaseSettings):
     redis_url: str
     celery_broker_url: str
     celery_result_backend: str
-    postgres_exporter_data_source_name: str
+    data_source_name: str
+    allowed_origins: str
     
     @field_validator("secret_key")
     @classmethod
@@ -32,7 +34,7 @@ class Settings(BaseSettings):
             raise ValueError("Weak secret key")
         return secret_key
     
-    @field_validator("postgres_exporter_data_source_name")
+    @field_validator("data_source_name")
     @classmethod
     def validate_database_url(cls, database_url: str) -> str:
         if not database_url.startswith("postgresql://"):
