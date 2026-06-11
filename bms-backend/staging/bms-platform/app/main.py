@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from core.logging import configure_logging
-from database.pool import create_pool, close_pool
+from app.database.pool import create_pool, close_pool
 from core.exceptions import (
     AppError,
     BadRequestError,
@@ -21,6 +21,7 @@ from core.exceptions import (
 )
 from monitoring.routers import router as monitoring_router
 from app.middleware.request_id import request_id_middleware
+from app.middleware.error_handler import error_handler_middleware
 
 
 settings = get_settings()
@@ -63,6 +64,7 @@ app.add_middleware(
 )
 
 app.middleware("http")(request_id_middleware)
+app.middleware("http")(error_handler_middleware)
 
 @app.exception_handler(AppError)
 async def app_error_handler(request: Request, exc: AppError) -> JSONResponse:

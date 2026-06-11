@@ -1,8 +1,6 @@
 import structlog
 import redis as redis_lib
 from fastapi import APIRouter, Depends
-from app.dependencies import get_pool
-
 from fastapi.responses import JSONResponse
 import asyncpg
 

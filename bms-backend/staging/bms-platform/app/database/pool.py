@@ -1,6 +1,5 @@
 import asyncpg
 import structlog
-from fastapi import FastAPI
 from app.config import get_settings
 
 logger = structlog.get_logger()

@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     celery_result_backend: str
     data_source_name: str
     allowed_origins: str
+    database_url: str
     
     @field_validator("secret_key")
     @classmethod

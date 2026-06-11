@@ -2,7 +2,6 @@ import structlog
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from app.config import get_settings
-from datetime import datetime
 
 
 logger = structlog.get_logger()
