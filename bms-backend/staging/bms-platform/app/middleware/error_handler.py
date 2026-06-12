@@ -22,7 +22,7 @@ async def error_handler_middleware(request: Request, call_next) -> JSONResponse:
         if settings.app_env == "development":
             content["details"] = str(e)
         
-        logger.exception("unhandled_exception", error=error_payload)
+        logger.exception("unhandled_exception", error=str(e))
         return JSONResponse(
             status_code=500,
             content=content,

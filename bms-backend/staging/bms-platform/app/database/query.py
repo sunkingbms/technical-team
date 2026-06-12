@@ -24,7 +24,7 @@ async def fetch_row(conn: asyncpg.Connection, query: str, *args, label: str = "u
     _log_if_slow(label, start)
     return result
 
-async def fetch(conn: asyncpg.Connection, query: str, *args, label="unlabelled") -> list[asyncpg.Record] : None:
+async def fetch(conn: asyncpg.Connection, query: str, *args, label="unlabelled") -> list[asyncpg.Record]:
     start = time.monotonic()
     result = await conn.fetch(query, *args)
     _log_if_slow(label, start)

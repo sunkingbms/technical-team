@@ -44,6 +44,21 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.celerybeat
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - .:/code
+      - celerybeat_data:/var/celerybeat
+    restart: unless-stopped
   postgres:
     image: postgres:16-alpine
     environment:
@@ -76,3 +91,4 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  celerybeat_data:
