@@ -3,10 +3,10 @@
 CREATE TABLE IF NOT EXISTS audit_log (
     id BIGSERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
-    request_id VARCHAR(100) NOT NULL,
+    request_id UUID NOT NULL,
     resource VARCHAR(100),
     status_code INTEGER NOT NULL,
-    duration_ms INTEGER NOT NULL,
+    duration_ms FLOAT NOT NULL,
     action VARCHAR(100) NOT NULL,
     ip_address INET,
     user_agent VARCHAR(255),

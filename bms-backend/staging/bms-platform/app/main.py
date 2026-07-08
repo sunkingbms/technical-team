@@ -1,5 +1,7 @@
 from contextlib import asynccontextmanager
 
+from redis.asyncio import Redis as AsyncRedis
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -23,6 +25,13 @@ from monitoring.routers import router as monitoring_router
 from app.middleware.request_id import request_id_middleware
 from app.middleware.error_handler import error_handler_middleware
 
+from app.auth.routers.router import router as auth_router
+from app.rbac.router import router as rbac_router
+from app.users.router import router as users_router
+from app.zendesk.router import router as zendesk_router
+
+from app.middleware.audit import audit_middleware
+
 
 settings = get_settings()
 configure_logging(settings.app_env)
@@ -42,8 +51,10 @@ STATUS_MAP = {
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.state.pool = await create_pool()
+    app.state.redis = AsyncRedis.from_url(settings.redis_url + "/2", decode_responses=True)
     yield
     await close_pool(app.state.pool)
+    await app.state.redis.aclose()
 
 app = FastAPI(
     title="BMS Platform",
@@ -62,7 +73,7 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["Content-Type", "Authorization", "X-Request-ID"],
 )
-
+app.middleware("http")(audit_middleware)
 app.middleware("http")(request_id_middleware)
 app.middleware("http")(error_handler_middleware)
 
@@ -76,4 +87,8 @@ async def app_error_handler(request: Request, exc: AppError) -> JSONResponse:
         },
     )
     
-app.include_router(monitoring_router, prefix="/api/v1", tags="system_checks")
+app.include_router(monitoring_router, prefix="/api/v1", tags=["system_checks"])
+app.include_router(auth_router, prefix="/api/v1", tags=["auth"])
+app.include_router(rbac_router, prefix="/api/v1", tags=["rbac"])
+app.include_router(users_router, prefix="/api/v1", tags=["users"])
+app.include_router(zendesk_router, prefix="/api/v1", tags=["zendesk"])

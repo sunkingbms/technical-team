@@ -14,6 +14,13 @@ async def error_handler_middleware(request: Request, call_next) -> JSONResponse:
     except Exception as e:
         settings = get_settings()
         
+        logger.exception(
+            "unhandled_exception", 
+            method=request.method,
+            path=request.url.path,
+            error=str(e)
+        )
+        
         content = {
             "error": "INTERNAL_SERVER_ERROR",
             "message": "An unexpected error occurred"
@@ -22,8 +29,6 @@ async def error_handler_middleware(request: Request, call_next) -> JSONResponse:
         if settings.app_env == "development":
             content["details"] = str(e)
         
-        logger.exception("unhandled_exception", error=error_payload)
-        return JSONResponse(
-            status_code=500,
-            content=content,
-        )
+        
+        
+        return JSONResponse(status_code=500, content=content)

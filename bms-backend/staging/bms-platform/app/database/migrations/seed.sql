@@ -1,12 +1,14 @@
 -- seed permissions and roles tables with few permissions and roles
 
 INSERT INTO permissions (codename, description) values
+('users:read', 'View users'),
 ('users:write', 'Create and update users'),
-('users:read', 'View users list and details'),
 ('users:delete', 'Delete users'),
 ('rbac:admin', 'Full RBAC management'),
 ('zendesk:create', 'Trigger Zendesk ticket creation'),
-('zendesk:delete', 'Trigger Zendesk tickets bulk deletion')
+('zendesk:delete', 'Trigger Zendesk ticket deletion'),
+('zendesk:read', 'View Zendesk instances and operations'),
+('zendesk:admin', 'Manage Zendesk instances and processes')
 ON CONFLICT (codename) DO NOTHING;
 
 

@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, SecretStr
 from functools import lru_cache
 
 class Settings(BaseSettings):
@@ -10,7 +10,8 @@ class Settings(BaseSettings):
     )
     
     app_env: str
-    secret_key: str
+    algorithm: str
+    secret_key: SecretStr
     access_token_expire_minutes: int
     refresh_token_expire_days: int
     postgres_db: str
@@ -24,14 +25,15 @@ class Settings(BaseSettings):
     data_source_name: str
     allowed_origins: str
     database_url: str
+    zendesk_fernet_key: str
     
     @field_validator("secret_key")
     @classmethod
-    def validate_secret_key(cls, secret_key: str) -> str:
+    def validate_secret_key(cls, secret_key: SecretStr) -> str:
         if len(secret_key) < 32:
             raise ValueError("Invalid secret key")
         insecure_values = {"changeme", "secret", "dev", "production", "test", "local", "development"}
-        if secret_key.lower() in insecure_values:
+        if secret_key in insecure_values:
             raise ValueError("Weak secret key")
         return secret_key
     
@@ -41,6 +43,19 @@ class Settings(BaseSettings):
         if not database_url.startswith("postgresql://"):
             raise ValueError("Invalid database URL")
         return database_url
+    
+    @field_validator("zendesk_fernet_key")
+    @classmethod
+    def validate_zendesk_frenet_key(cls, key: str) -> str:
+        """Validates the Zendesk Frenet key"""
+        if len(key) != 44:
+            raise ValueError("Invalid zendesk frenet key")
+        try:
+            from cryptography.fernet import Fernet
+            Fernet(key.encode())
+            return key
+        except Exception as e:
+            raise ValueError(f"Invalid zendesk frenet key: {str(e)}")
     
     
 @lru_cache
