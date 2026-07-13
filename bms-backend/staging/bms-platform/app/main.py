@@ -29,6 +29,8 @@ from app.auth.routers.router import router as auth_router
 from app.rbac.router import router as rbac_router
 from app.users.router import router as users_router
 from app.zendesk.router import router as zendesk_router
+from app.zendesk.processes_router import router as zendesk_processes_router
+from app.zendesk.operations_router import router as zendesk_operations_router
 
 from app.middleware.audit import audit_middleware
 
@@ -92,3 +94,5 @@ app.include_router(auth_router, prefix="/api/v1", tags=["auth"])
 app.include_router(rbac_router, prefix="/api/v1", tags=["rbac"])
 app.include_router(users_router, prefix="/api/v1", tags=["users"])
 app.include_router(zendesk_router, prefix="/api/v1", tags=["zendesk"])
+app.include_router(zendesk_processes_router, prefix="/api/v1", tags=["zendesk"])
+app.include_router(zendesk_operations_router, prefix="/api/v1", tags=["zendesk"])

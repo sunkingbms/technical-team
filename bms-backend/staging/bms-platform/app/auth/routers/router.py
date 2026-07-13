@@ -9,16 +9,18 @@ from app.auth.models.schemas import (
     TokenResponse, 
     RefreshTokenRequest
 )
-from app.auth.services.service import ( 
-    decode_token, 
-    revoke_token, 
-    rotate_refresh_token, 
-    create_token, 
+from app.auth.services.service import (
+    decode_token,
+    revoke_token,
+    rotate_refresh_token,
+    create_token,
     authenticate_user
 )
 from core.exceptions import UnauthorizedError, ErrorCodes
 from app.dependencies import get_pool, get_redis, get_current_user
 from app.database.query import execute
+from app.users import repository as users_rep
+from app.users.schemas import UserResponse
 
 
 router = APIRouter(
@@ -60,6 +62,16 @@ async def refresh(request: Request, body: RefreshTokenRequest, redis: Redis = De
         token_type=tokens["token_type"]
     )
     
+@router.get("/me", status_code=status.HTTP_200_OK, response_model=UserResponse)
+async def get_me(
+    current_user: dict = Depends(get_current_user),
+    pool: asyncpg.Pool = Depends(get_pool),
+):
+    """Returns the profile of the currently authenticated user (from the access token)."""
+    async with pool.acquire() as conn:
+        return await users_rep.get_user_by_id(conn, current_user["id"])
+
+
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
 async def logout(body: RefreshTokenRequest, redis: Redis = Depends(get_redis), current_user: dict = Depends(get_current_user) ):
     """Method used to logout a user by revoking their refresh token."""

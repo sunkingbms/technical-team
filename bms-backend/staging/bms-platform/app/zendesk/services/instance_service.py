@@ -71,15 +71,34 @@ async def refresh_groups(conn: asyncpg.Connection, instance_id: int, client: Zen
         )
         
         
-async def refresh_all(conn: asyncpg.Connection, instance_id: int):
-    """Refreshes all metadata for a given Zendesk instance."""
-    # 1. Get the instance credentials
+async def _build_client(conn: asyncpg.Connection, instance_id: int) -> ZendeskClient:
+    """Loads instance credentials and builds a ready-to-use ZendeskClient."""
     creds = await get_instance_credentials(conn, instance_id)
     api_token = decrypt_token(creds["encrypted_api_token"])
-    
-    # 2. Create a Zendesk client
-    client = ZendeskClient(creds["subdomain"], creds["email"], api_token)
-    
+    return ZendeskClient(creds["subdomain"], creds["email"], api_token)
+
+
+async def refresh_all(conn: asyncpg.Connection, instance_id: int):
+    """Refreshes all metadata (fields + forms + groups) for a given Zendesk instance."""
+    client = await _build_client(conn, instance_id)
     await refresh_fields(conn, instance_id, client)
     await refresh_forms(conn, instance_id, client)
+    await refresh_groups(conn, instance_id, client)
+
+
+async def refresh_fields_only(conn: asyncpg.Connection, instance_id: int):
+    """Refreshes just the ticket fields for a given Zendesk instance."""
+    client = await _build_client(conn, instance_id)
+    await refresh_fields(conn, instance_id, client)
+
+
+async def refresh_forms_only(conn: asyncpg.Connection, instance_id: int):
+    """Refreshes just the ticket forms for a given Zendesk instance."""
+    client = await _build_client(conn, instance_id)
+    await refresh_forms(conn, instance_id, client)
+
+
+async def refresh_groups_only(conn: asyncpg.Connection, instance_id: int):
+    """Refreshes just the groups for a given Zendesk instance."""
+    client = await _build_client(conn, instance_id)
     await refresh_groups(conn, instance_id, client)

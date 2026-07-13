@@ -6,7 +6,9 @@ from app.zendesk import repository as zendesk_repo
 from app.zendesk.schemas import InstanceCreate, InstanceUpdate, InstanceResponse
 from app.zendesk.crypto import encrypt_token
 from core.exceptions import NotFoundError, ConflictError, ErrorCodes
-from app.zendesk.services.instance_service import refresh_all
+from app.zendesk.services.instance_service import (
+    refresh_all, refresh_fields_only, refresh_forms_only, refresh_groups_only,
+)
 
 router = APIRouter(
     prefix="/zendesk",
@@ -61,11 +63,48 @@ async def refresh_instance_metadata(
     pool: asyncpg.Pool = Depends(get_pool),
     _: dict = Depends(require_permission("zendesk:admin"))
 ):
-    """Endpoint refreshing the metadata for a single zendesk instance by ID."""
+    """Endpoint refreshing all metadata (fields + forms + groups) for a single zendesk instance by ID."""
     async with pool.acquire() as conn:
-        await instance_service.refresh_all(conn, instance_id)
+        await refresh_all(conn, instance_id)
     return {"message": "Metadata refreshed successfully"}
-    
+
+
+@router.post("/instances/{instance_id}/refresh-fields", status_code=status.HTTP_200_OK)
+async def refresh_instance_fields(
+    instance_id: int,
+    pool: asyncpg.Pool = Depends(get_pool),
+    _: dict = Depends(require_permission("zendesk:admin"))
+):
+    """Endpoint refreshing just the ticket fields for a single zendesk instance by ID."""
+    async with pool.acquire() as conn:
+        await refresh_fields_only(conn, instance_id)
+    return {"message": "Fields refreshed successfully"}
+
+
+@router.post("/instances/{instance_id}/refresh-forms", status_code=status.HTTP_200_OK)
+async def refresh_instance_forms(
+    instance_id: int,
+    pool: asyncpg.Pool = Depends(get_pool),
+    _: dict = Depends(require_permission("zendesk:admin"))
+):
+    """Endpoint refreshing just the ticket forms for a single zendesk instance by ID."""
+    async with pool.acquire() as conn:
+        await refresh_forms_only(conn, instance_id)
+    return {"message": "Forms refreshed successfully"}
+
+
+@router.post("/instances/{instance_id}/refresh-groups", status_code=status.HTTP_200_OK)
+async def refresh_instance_groups(
+    instance_id: int,
+    pool: asyncpg.Pool = Depends(get_pool),
+    _: dict = Depends(require_permission("zendesk:admin"))
+):
+    """Endpoint refreshing just the groups for a single zendesk instance by ID."""
+    async with pool.acquire() as conn:
+        await refresh_groups_only(conn, instance_id)
+    return {"message": "Groups refreshed successfully"}
+
+
 ############# PATCH ENDPOINTS ##################
 @router.patch("/instances/{instance_id}", status_code=status.HTTP_200_OK, response_model=InstanceResponse)
 async def update_instance(

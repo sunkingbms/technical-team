@@ -26,7 +26,18 @@ class Settings(BaseSettings):
     allowed_origins: str
     database_url: str
     zendesk_fernet_key: str
-    
+
+    # Zendesk — Google Sheets ingestion (Apps Script web app used as a thin
+    # proxy in front of the spreadsheet; see app/zendesk/services/sheets_client.py)
+    google_apps_script_url: str = ""
+
+    # Zendesk — completion/failure emails sent by the Celery bulk job worker
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_pass: str = ""
+    smtp_from: str = ""
+
     @field_validator("secret_key")
     @classmethod
     def validate_secret_key(cls, secret_key: SecretStr) -> str:
