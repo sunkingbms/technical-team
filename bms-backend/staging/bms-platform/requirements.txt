@@ -1,0 +1,39 @@
+# Web
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+
+# Database
+asyncpg==0.29.0
+
+# Auth
+pwdlib[argon2]==0.3.0
+pyjwt==2.10.1
+
+# Config
+pydantic-settings==2.2.1
+
+# Validaton
+email-validator==2.2.0
+
+# HTTP client
+httpx==0.27.0
+
+# Task queue
+celery==5.3.6
+redis==5.0.4
+
+# Monitoring
+prometheus-fastapi-instrumentator==6.1.0
+prometheus-client==0.20.0
+
+# Logging
+structlog==24.1.0
+
+# Rate limiting
+slowapi==0.1.9
+
+# Sync postgres for Celery permanent failure handler
+psycopg2-binary==2.9.9
+
+# Security and encryption
+cryptography
